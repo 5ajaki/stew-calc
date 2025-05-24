@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PriceDisplayProps, PriceData } from "@/types";
 import { formatCurrency } from "@/lib/calculations";
 import { format, parseISO } from "date-fns";
@@ -12,6 +12,36 @@ export function PriceDisplay({
 }: PriceDisplayProps) {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Set initial state based on screen size
+  useEffect(() => {
+    // Check if window exists (client-side)
+    if (typeof window !== "undefined") {
+      // Tailwind's lg breakpoint is 1024px
+      const mediaQuery = window.matchMedia("(min-width: 1024px)");
+
+      const handleMediaChange = (e: MediaQueryListEvent) => {
+        const isDesktopView = e.matches;
+        setIsDesktop(isDesktopView);
+        // Only open details when switching TO desktop, don't close when switching to mobile
+        if (isDesktopView) {
+          setIsDetailOpen(true);
+        }
+      };
+
+      // Set initial state
+      const isDesktopView = mediaQuery.matches;
+      setIsDesktop(isDesktopView);
+      setIsDetailOpen(isDesktopView); // Desktop shows details by default, mobile hides them
+
+      // Listen for changes
+      mediaQuery.addEventListener("change", handleMediaChange);
+
+      // Cleanup
+      return () => mediaQuery.removeEventListener("change", handleMediaChange);
+    }
+  }, []); // Empty dependency array since we only want this to run once on mount
 
   if (loading) {
     return (
@@ -160,6 +190,11 @@ export function PriceDisplay({
                 January 1 - July 1, 2025 ({calculationPeriod.totalDays} days
                 total)
               </p>
+              <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                {isDesktop
+                  ? "Desktop view: Details shown by default"
+                  : "Mobile view: Tap to expand details"}
+              </p>
             </div>
             <div className="flex space-x-2">
               {isDetailOpen && (
@@ -186,9 +221,26 @@ export function PriceDisplay({
               )}
               <button
                 onClick={() => setIsDetailOpen(!isDetailOpen)}
-                className="px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                className="px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors flex items-center"
               >
-                {isDetailOpen ? "Hide Details" : "Show Details"}
+                <span className="mr-2">
+                  {isDetailOpen ? "Hide Details" : "Show Details"}
+                </span>
+                <svg
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    isDetailOpen ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
               </button>
             </div>
           </div>
