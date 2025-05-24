@@ -2,8 +2,8 @@
 
 A web application that calculates and displays $ENS token allocations for ENS DAO stewards based on the Term 6 compensation structure, with real-time price data and vesting visualizations.
 
-![App Screenshot](screenshots/calculator-overview.png)
-_Main calculator interface showing role selection and token calculations_
+![image](https://github.com/user-attachments/assets/5cf3e654-4d8b-4776-99fa-dfb721970776)
+
 
 ## 🎯 What This App Does
 
