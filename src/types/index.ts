@@ -57,7 +57,7 @@ export interface TokenCalculation {
 
 // API response types
 export interface CoinGeckoPrice {
-  ethereum_name_service: {
+  "ethereum-name-service": {
     usd: number;
   };
 }

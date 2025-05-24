@@ -88,7 +88,7 @@ export async function fetchCurrentENSPrice(): Promise<number> {
     const data: CoinGeckoPrice & { _fallback?: boolean } =
       await response.json();
 
-    const price = data.ethereum_name_service?.usd;
+    const price = data["ethereum-name-service"]?.usd;
     if (!price || !isValidPrice(price)) {
       throw createAPIError(ErrorType.INVALID_DATA, ERROR_MESSAGES.INVALID_DATA);
     }
@@ -211,10 +211,9 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
       ) + 1; // 181 days
 
     console.log(
-      `[API] Term 6 period: ${totalDays} days total, ${Math.max(
-        0,
-        daysFromStart
-      )} days elapsed`
+      `[API] Term 6 period: ${totalDays} days total, days from start: ${daysFromStart} (today: ${
+        today.toISOString().split("T")[0]
+      })`
     );
 
     let historicalPrices: PriceData[] = [];
@@ -224,6 +223,7 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
       try {
         // Fetch historical data from Jan 1 to today
         const daysSinceStart = Math.min(daysFromStart, totalDays);
+        console.log(`[API] Fetching ${daysSinceStart} days of historical data`);
         historicalPrices = await fetchENSPriceHistory(daysSinceStart);
 
         // Filter to ensure we only get data from Jan 1, 2025 onwards
@@ -241,6 +241,10 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
         );
         historicalPrices = [];
       }
+    } else {
+      console.log(
+        `[API] Before Term 6 start date - all data will be projected using current price`
+      );
     }
 
     // Generate complete 181-day price dataset

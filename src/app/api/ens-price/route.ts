@@ -65,7 +65,16 @@ export async function GET(request: NextRequest) {
 
     // Validate the data
     if (type === "current") {
-      const price = data.ethereum_name_service?.usd;
+      console.log(
+        `[API Route] Raw CoinGecko response:`,
+        JSON.stringify(data, null, 2)
+      );
+      const price = data["ethereum-name-service"]?.usd;
+      console.log(
+        `[API Route] Extracted price: ${price}, isValid: ${isValidPrice(
+          price || 0
+        )}`
+      );
       if (!price || !isValidPrice(price)) {
         throw new Error("Invalid price data received");
       }
@@ -89,7 +98,7 @@ export async function GET(request: NextRequest) {
     // Return fallback data for current price
     if (type === "current") {
       const fallbackData = {
-        ethereum_name_service: { usd: 12.0 }, // Fallback price
+        "ethereum-name-service": { usd: 12.0 }, // Fallback price
         _fallback: true,
       };
       return NextResponse.json(fallbackData);

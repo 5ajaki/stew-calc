@@ -4,19 +4,34 @@ A web application that calculates and displays $ENS token allocations for ENS DA
 
 ![image](https://github.com/user-attachments/assets/5cf3e654-4d8b-4776-99fa-dfb721970776)
 
-
 ## 🎯 What This App Does
 
 This calculator helps ENS DAO stewards understand their token compensation by:
 
 - **Real-time Price Integration**: Fetches current $ENS prices from CoinGecko API
-- **Automatic Calculations**: Converts USD compensation to token amounts using 6-month averages
+- **Accurate Term 6 Calculation**: Uses exact Jan 1 - July 1, 2025 period (181 days)
+- **Smart Data Blending**: Historical data (Jan 1 to today) + projected data (today to July 1)
+- **Transparent Breakdown**: Detailed 181-day table showing every price used in calculations
 - **Vesting Visualization**: Shows 2-year linear vesting schedule with clear breakdowns
 - **Role Comparison**: Switch between Steward ($48K) and Lead Steward ($66K) compensation
-- **Transparent Breakdown**: See exactly how token allocations are calculated
 
 ![Price Display](screenshots/price-display.png)
 _Live ENS price display with 6-month projection_
+
+## 📊 Detailed Price Calculation Table
+
+The app includes an expandable table showing all 181 days of Term 6 price data:
+
+![Price Detail Table](screenshots/price-detail-table.png)
+_Detailed breakdown of all 181 days with historical vs projected data_
+
+**Table Features:**
+
+- **Historical Data** (Green): Real ENS prices from CoinGecko API
+- **Projected Data** (Blue): Current price held constant through July 1
+- **Running Averages**: See how the 6-month average evolves day by day
+- **Progressive Updates**: As days pass, more data becomes historical
+- **Sortable & Searchable**: Full transparency of calculation methodology
 
 ## 💼 ENS DAO Term 6 Compensation Structure
 
@@ -52,11 +67,13 @@ _Token vesting timeline and breakdown_
 
 **Key Features:**
 
-- Server-side API routes to handle CORS issues
-- 15-minute price data caching
-- Fallback data for API reliability
-- Mobile-responsive design
-- Real-time calculation updates
+- **Accurate Term 6 calculation**: Exact 181-day period (Jan 1 - July 1, 2025)
+- **Smart data blending**: Real historical + projected price data
+- **Server-side API routes**: Handle CORS issues with CoinGecko
+- **15-minute price caching**: Optimized API usage
+- **Fallback data reliability**: Graceful degradation when APIs fail
+- **Mobile-responsive design**: Works on all devices
+- **Real-time calculation updates**: Instant feedback on role changes
 
 ![Mobile View](screenshots/mobile-responsive.png)
 _Responsive design works on all devices_
@@ -75,12 +92,21 @@ Shows current $ENS price with projected 6-month average for token calculations.
 
 Real-time breakdown of:
 
-- Total token allocation
+- Total token allocation based on accurate 6-month average
 - Tokens vested at distribution (25%)
 - Monthly vesting amounts
 - Current USD value of allocation
 
-### 4. Vesting Timeline
+### 4. Price Detail Table (NEW!)
+
+Expandable table showing all 181 days of Term 6 calculation data:
+
+- Historical prices (green) vs projected prices (blue)
+- Running 6-month averages
+- Complete transparency of calculation methodology
+- Updates daily as more data becomes historical
+
+### 5. Vesting Timeline
 
 Visual representation of the 2-year vesting schedule with key dates and milestones.
 
