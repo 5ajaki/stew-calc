@@ -114,6 +114,72 @@ export async function fetchCurrentENSPrice(): Promise<number> {
 }
 
 /**
+ * Fetch historical ENS price data from our API route using date range
+ */
+export async function fetchENSPriceHistoryRange(
+  fromTimestamp: number,
+  toTimestamp: number
+): Promise<PriceData[]> {
+  const cacheKey = `ens_price_range_${fromTimestamp}_${toTimestamp}`;
+  const cached = cache.get<PriceData[]>(cacheKey);
+
+  if (cached !== null) {
+    return cached;
+  }
+
+  try {
+    console.log("[API] Fetching price history range from API route");
+
+    const response = await fetch(
+      `/api/ens-price?type=range&from=${fromTimestamp}&to=${toTimestamp}`,
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw createAPIError(
+        ErrorType.API_ERROR,
+        `HTTP ${response.status}: ${response.statusText}`
+      );
+    }
+
+    const data: CoinGeckoMarketChart = await response.json();
+
+    if (!data.prices || !Array.isArray(data.prices)) {
+      throw createAPIError(ErrorType.INVALID_DATA, ERROR_MESSAGES.INVALID_DATA);
+    }
+
+    const priceData: PriceData[] = data.prices
+      .map(([timestamp, price]) => ({
+        date: timestampToDateString(timestamp),
+        price,
+        timestamp,
+      }))
+      .filter((p) => isValidPrice(p.price));
+
+    if (priceData.length === 0) {
+      throw createAPIError(ErrorType.INVALID_DATA, ERROR_MESSAGES.NO_DATA);
+    }
+
+    cache.set(cacheKey, priceData);
+    return priceData;
+  } catch (error) {
+    console.error("Error fetching ENS price history range:", error);
+
+    // Return cached data if available
+    const staleData = cache.get<PriceData[]>(cacheKey);
+    if (staleData !== null) {
+      return staleData;
+    }
+
+    throw error;
+  }
+}
+
+/**
  * Fetch historical ENS price data from our API route
  */
 export async function fetchENSPriceHistory(
@@ -200,54 +266,52 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
     const startDate = new Date("2025-01-01T00:00:00.000Z"); // Use UTC to avoid timezone issues
     const endDate = new Date("2025-07-01T00:00:00.000Z");
     const today = new Date();
+    today.setUTCHours(0, 0, 0, 0); // Normalize to start of day UTC
 
-    // Calculate days from start to today and total days
-    const daysFromStart = Math.floor(
-      (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    const totalDays =
+    // If today is after July 1, 2025, use July 1 as the cutoff
+    const effectiveEndDate = today > endDate ? endDate : today;
+
+    // Calculate days from start to effective end date
+    const daysFromStart =
       Math.floor(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-      ) + 1; // 181 days
+        (effectiveEndDate.getTime() - startDate.getTime()) /
+          (1000 * 60 * 60 * 24)
+      ) + 1; // +1 to include start date
+
+    const totalDays = 181; // Fixed: Jan 1 to July 1, 2025 inclusive
 
     console.log(
-      `[API] Term 6 period: ${totalDays} days total, days from start: ${daysFromStart} (today: ${
+      `[API] Term 6 period: ${totalDays} days total, historical days needed: ${daysFromStart} (today: ${
         today.toISOString().split("T")[0]
       })`
     );
 
     let historicalPrices: PriceData[] = [];
 
-    // Only fetch historical data if we're past Jan 1, 2025
-    if (daysFromStart > 0) {
+    // Only fetch historical data if we're on or past Jan 1, 2025
+    if (today >= startDate) {
       try {
-        // Fetch more historical data than we need to ensure we have coverage
-        // CoinGecko returns data going backwards from today, so we need extra buffer
-        const daysToFetch = Math.min(daysFromStart + 7, 365); // Add 7-day buffer, max 365 days
-        console.log(
-          `[API] Fetching ${daysToFetch} days of historical data (with buffer)`
-        );
-        historicalPrices = await fetchENSPriceHistory(daysToFetch);
-
-        // Filter to ensure we only get data from Jan 1, 2025 onwards
-        // Create a precise cutoff at start of January 1, 2025 UTC
-        const jan1_2025_cutoff = startDate.getTime();
-
-        const beforeFilter = historicalPrices.length;
-        historicalPrices = historicalPrices.filter((p) => {
-          // Ensure the timestamp is at or after January 1, 2025 00:00:00 UTC
-          return p.timestamp >= jan1_2025_cutoff;
-        });
+        // Use the range endpoint to fetch exactly the data we need
+        // Convert dates to UNIX timestamps (in seconds, not milliseconds)
+        const fromTimestamp = Math.floor(startDate.getTime() / 1000);
+        const toTimestamp = Math.floor(effectiveEndDate.getTime() / 1000);
 
         console.log(
-          `[API] Filtered historical data: ${beforeFilter} -> ${
-            historicalPrices.length
-          } entries (removed ${
-            beforeFilter - historicalPrices.length
-          } pre-Jan-1 entries)`
+          `[API] Fetching historical data from ${
+            startDate.toISOString().split("T")[0]
+          } to ${effectiveEndDate.toISOString().split("T")[0]}`
         );
 
-        // Additional safety check: log the date range of filtered data
+        historicalPrices = await fetchENSPriceHistoryRange(
+          fromTimestamp,
+          toTimestamp
+        );
+
+        console.log(
+          `[API] Received ${historicalPrices.length} historical data points`
+        );
+
+        // Additional safety check: log the date range of received data
         if (historicalPrices.length > 0) {
           const firstDate = historicalPrices[0].date;
           const lastDate = historicalPrices[historicalPrices.length - 1].date;
@@ -273,7 +337,7 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
     for (let dayOffset = 0; dayOffset < totalDays; dayOffset++) {
       const date = new Date(startDate);
       date.setUTCDate(date.getUTCDate() + dayOffset); // Use UTC to avoid timezone issues
-      const dateStr = timestampToDateString(date.getTime());
+      const dateStr = date.toISOString().split("T")[0]; // Format as YYYY-MM-DD in UTC
 
       // Use historical data if available, otherwise project current price
       const historicalDay = historicalPrices.find((p) => p.date === dateStr);
