@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# development planning (local only)
+dev_plan.md
+
+# Cursor-specific files (contains sensitive API keys and local config)
+.cursor/
+.cursorignore
+
+# Internal project documentation (keep private)
+.assets/
+
+# Development rules (uncomment if you want to keep this local)
+.cursorrules
