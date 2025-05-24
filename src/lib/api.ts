@@ -197,8 +197,8 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
     const currentPrice = await fetchCurrentENSPrice();
 
     // Term 6 calculation period: Jan 1, 2025 to July 1, 2025 (181 days)
-    const startDate = new Date("2025-01-01");
-    const endDate = new Date("2025-07-01");
+    const startDate = new Date("2025-01-01T00:00:00.000Z"); // Use UTC to avoid timezone issues
+    const endDate = new Date("2025-07-01T00:00:00.000Z");
     const today = new Date();
 
     // Calculate days from start to today and total days
@@ -221,20 +221,40 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
     // Only fetch historical data if we're past Jan 1, 2025
     if (daysFromStart > 0) {
       try {
-        // Fetch historical data from Jan 1 to today
-        const daysSinceStart = Math.min(daysFromStart, totalDays);
-        console.log(`[API] Fetching ${daysSinceStart} days of historical data`);
-        historicalPrices = await fetchENSPriceHistory(daysSinceStart);
+        // Fetch more historical data than we need to ensure we have coverage
+        // CoinGecko returns data going backwards from today, so we need extra buffer
+        const daysToFetch = Math.min(daysFromStart + 7, 365); // Add 7-day buffer, max 365 days
+        console.log(
+          `[API] Fetching ${daysToFetch} days of historical data (with buffer)`
+        );
+        historicalPrices = await fetchENSPriceHistory(daysToFetch);
 
         // Filter to ensure we only get data from Jan 1, 2025 onwards
-        const jan1_2025 = startDate.getTime();
-        historicalPrices = historicalPrices.filter(
-          (p) => p.timestamp >= jan1_2025
-        );
+        // Create a precise cutoff at start of January 1, 2025 UTC
+        const jan1_2025_cutoff = startDate.getTime();
+
+        const beforeFilter = historicalPrices.length;
+        historicalPrices = historicalPrices.filter((p) => {
+          // Ensure the timestamp is at or after January 1, 2025 00:00:00 UTC
+          return p.timestamp >= jan1_2025_cutoff;
+        });
 
         console.log(
-          `[API] Fetched ${historicalPrices.length} days of historical data`
+          `[API] Filtered historical data: ${beforeFilter} -> ${
+            historicalPrices.length
+          } entries (removed ${
+            beforeFilter - historicalPrices.length
+          } pre-Jan-1 entries)`
         );
+
+        // Additional safety check: log the date range of filtered data
+        if (historicalPrices.length > 0) {
+          const firstDate = historicalPrices[0].date;
+          const lastDate = historicalPrices[historicalPrices.length - 1].date;
+          console.log(
+            `[API] Historical data range: ${firstDate} to ${lastDate}`
+          );
+        }
       } catch {
         console.warn(
           "[API] Could not fetch historical data, using current price for all days"
@@ -252,13 +272,13 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
 
     for (let dayOffset = 0; dayOffset < totalDays; dayOffset++) {
       const date = new Date(startDate);
-      date.setDate(date.getDate() + dayOffset);
+      date.setUTCDate(date.getUTCDate() + dayOffset); // Use UTC to avoid timezone issues
       const dateStr = timestampToDateString(date.getTime());
 
       // Use historical data if available, otherwise project current price
       const historicalDay = historicalPrices.find((p) => p.date === dateStr);
       const price = historicalDay ? historicalDay.price : currentPrice;
-      const isProjected = !historicalDay && date > today;
+      const isProjected = !historicalDay;
 
       completePriceData.push({
         date: dateStr,
@@ -282,6 +302,13 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
         4
       )} (${historicalDays} historical + ${projectedDays} projected days)`
     );
+
+    // Verify first entry is January 1, 2025
+    if (completePriceData.length > 0) {
+      console.log(
+        `[API] First entry date: ${completePriceData[0].date} (should be 2025-01-01)`
+      );
+    }
 
     const result: PriceHistory = {
       prices: completePriceData,
