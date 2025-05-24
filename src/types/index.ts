@@ -12,6 +12,15 @@ export interface PriceData {
   date: string; // ISO date string (YYYY-MM-DD)
   price: number; // USD price
   timestamp: number; // Unix timestamp
+  isProjected?: boolean; // Whether this is projected data (vs historical)
+}
+
+export interface CalculationPeriod {
+  startDate: string; // '2025-01-01'
+  endDate: string; // '2025-07-01'
+  totalDays: number;
+  historicalDays: number;
+  projectedDays: number;
 }
 
 export interface PriceHistory {
@@ -19,6 +28,7 @@ export interface PriceHistory {
   averagePrice: number; // 6-month average
   currentPrice: number;
   lastUpdated: number; // Unix timestamp
+  calculationPeriod?: CalculationPeriod; // Term 6 specific calculation details
 }
 
 export interface VestingEvent {

@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { RoleSelector } from "@/components/Calculator/RoleSelector";
 import { PriceDisplay } from "@/components/Calculator/PriceDisplay";
+import { PriceDetailTable } from "@/components/Calculator/PriceDetailTable";
 import { TokenCalculation } from "@/components/Calculator/TokenCalculation";
 import { usePriceData } from "@/hooks/usePriceData";
 import { STEWARD_ROLES, DEFAULTS } from "@/lib/constants";
@@ -70,6 +71,9 @@ export default function Home() {
               loading={loading}
               error={error}
             />
+
+            {/* Price Detail Table */}
+            {priceHistory && <PriceDetailTable priceHistory={priceHistory} />}
           </div>
 
           {/* Right Column */}
