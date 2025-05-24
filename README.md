@@ -18,7 +18,6 @@ This tool helps ENS DAO stewards understand their token compensation by:
 - **Styling**: Tailwind CSS
 - **Charts**: Recharts
 - **API**: CoinGecko (for $ENS price data)
-- **Deployment**: Vercel
 
 ## 💼 Business Logic
 
@@ -89,26 +88,6 @@ npm run dev
    - The app should load and start fetching real $ENS price data
    - Try switching between Steward and Lead Steward roles
 
-### 🚀 Deploying to Vercel (Fixes CORS Issues!)
-
-**Important:** Deploying to Vercel solves CORS issues you might encounter in local development!
-
-1. **One-Click Deploy:**
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/ens-steward-calculator)
-
-2. **Manual Deployment:**
-
-   ```bash
-   npm install -g vercel
-   vercel
-   ```
-
-3. **Set Environment Variables in Vercel:**
-   - Go to your project dashboard on Vercel
-   - Navigate to Settings → Environment Variables
-   - Add: `COINGECKO_API_KEY` (your CoinGecko API key)
-   - Deploy again to apply changes
-
 ### 🔧 API Architecture
 
 This application uses **Next.js API Routes** to solve CORS issues:
@@ -117,18 +96,11 @@ This application uses **Next.js API Routes** to solve CORS issues:
 Browser → /api/ens-price → CoinGecko API → /api/ens-price → Browser
 ```
 
-**Local Development Issues:**
+**Local Development Notes:**
 
 - Direct browser calls to CoinGecko API are blocked by CORS
 - The API routes run server-side and bypass CORS restrictions
 - Fallback data is provided if CoinGecko API is unreachable
-
-**Vercel Deployment Benefits:**
-
-- ✅ No CORS issues (server-side API routes)
-- ✅ Better caching and performance
-- ✅ Secure environment variable handling
-- ✅ Automatic HTTPS and global CDN
 
 ### Testing the API Integration
 
