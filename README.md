@@ -2,7 +2,8 @@
 
 A web application that calculates and displays $ENS token allocations for ENS DAO stewards based on the Term 6 compensation structure, with real-time price data and vesting visualizations.
 
-![image](https://github.com/user-attachments/assets/a53e4b9e-18d8-4cb5-a099-a17134428a4c)
+![image](https://github.com/user-attachments/assets/ef60c01e-6bd6-4673-a976-bdd4a21152ce)
+
 
 
 ## 🎯 What This App Does
@@ -16,15 +17,12 @@ This calculator helps ENS DAO stewards understand their token compensation by:
 - **Vesting Visualization**: Shows 2-year linear vesting schedule with clear breakdowns
 - **Role Comparison**: Switch between Steward ($48K) and Lead Steward ($66K) compensation
 
-![Price Display](screenshots/price-display.png)
-_Live ENS price display with 6-month projection_
 
 ## 📊 Detailed Price Calculation Table
 
 The app includes an expandable table showing all 181 days of Term 6 price data:
 
-![Price Detail Table](screenshots/price-detail-table.png)
-_Detailed breakdown of all 181 days with historical vs projected data_
+
 
 **Table Features:**
 
@@ -54,8 +52,7 @@ Total Tokens = Annual USD Compensation ÷ 6-Month Average $ENS Price
 - **Vesting Period**: 2-year linear vesting
 - **Full Vesting**: January 1, 2027
 
-![Vesting Chart](screenshots/vesting-breakdown.png)
-_Token vesting timeline and breakdown_
+
 
 ## 🏗️ Technical Implementation
 
@@ -76,8 +73,7 @@ _Token vesting timeline and breakdown_
 - **Mobile-responsive design**: Works on all devices
 - **Real-time calculation updates**: Instant feedback on role changes
 
-![Mobile View](screenshots/mobile-responsive.png)
-_Responsive design works on all devices_
+
 
 ## 📊 App Components
 
@@ -98,7 +94,7 @@ Real-time breakdown of:
 - Monthly vesting amounts
 - Current USD value of allocation
 
-### 4. Price Detail Table (NEW!)
+### 4. Price Detail Table
 
 Expandable table showing all 181 days of Term 6 calculation data:
 
@@ -107,12 +103,7 @@ Expandable table showing all 181 days of Term 6 calculation data:
 - Complete transparency of calculation methodology
 - Updates daily as more data becomes historical
 
-### 5. Vesting Timeline
 
-Visual representation of the 2-year vesting schedule with key dates and milestones.
-
-![Component Breakdown](screenshots/component-overview.png)
-_All calculator components working together_
 
 ## 🚨 Important Notes
 
