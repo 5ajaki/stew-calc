@@ -2,31 +2,30 @@
 
 A web application that calculates and displays $ENS token allocations for ENS DAO stewards based on the Term 6 compensation structure, with real-time price data and vesting visualizations.
 
-## 🎯 Purpose
+![App Screenshot](screenshots/calculator-overview.png)
+_Main calculator interface showing role selection and token calculations_
 
-This tool helps ENS DAO stewards understand their token compensation by:
+## 🎯 What This App Does
 
-- Calculating token allocations based on 6-month average $ENS prices
-- Visualizing 2-year linear vesting schedules
-- Providing transparent compensation breakdowns
-- Tracking real-time price impacts on allocations
+This calculator helps ENS DAO stewards understand their token compensation by:
 
-## 🏗️ Built With
+- **Real-time Price Integration**: Fetches current $ENS prices from CoinGecko API
+- **Automatic Calculations**: Converts USD compensation to token amounts using 6-month averages
+- **Vesting Visualization**: Shows 2-year linear vesting schedule with clear breakdowns
+- **Role Comparison**: Switch between Steward ($48K) and Lead Steward ($66K) compensation
+- **Transparent Breakdown**: See exactly how token allocations are calculated
 
-- **Framework**: Next.js 14+ (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Charts**: Recharts
-- **API**: CoinGecko (for $ENS price data)
+![Price Display](screenshots/price-display.png)
+_Live ENS price display with 6-month projection_
 
-## 💼 Business Logic
+## 💼 ENS DAO Term 6 Compensation Structure
 
-### Compensation Structure (Term 6)
+### Annual Compensation
 
 - **Steward**: $48,000 annually ($4,000/month)
 - **Lead Steward**: $66,000 annually ($5,500/month)
 
-### Token Calculation
+### Token Calculation Formula
 
 ```
 Total Tokens = Annual USD Compensation ÷ 6-Month Average $ENS Price
@@ -34,233 +33,74 @@ Total Tokens = Annual USD Compensation ÷ 6-Month Average $ENS Price
 
 ### Vesting Schedule
 
-- **Start**: January 1, 2025
-- **Distribution**: July 1, 2025 (25% already vested)
-- **Duration**: 2-year linear vesting
-- **Completion**: January 1, 2027
+- **Start Date**: January 1, 2025
+- **Distribution Date**: July 1, 2025 (25% already vested at distribution)
+- **Vesting Period**: 2-year linear vesting
+- **Full Vesting**: January 1, 2027
 
-## 🚀 Quick Start
+![Vesting Chart](screenshots/vesting-breakdown.png)
+_Token vesting timeline and breakdown_
 
-### Prerequisites
+## 🏗️ Technical Implementation
 
-- Node.js 18+
-- npm or yarn
-- CoinGecko API key (optional but recommended for higher rate limits)
+**Built With:**
 
-### Installation & Setup
+- Next.js 14 (App Router) + TypeScript
+- Tailwind CSS for responsive design
+- CoinGecko API for real-time price data
+- Recharts for data visualization
 
-1. **Clone and install dependencies:**
+**Key Features:**
 
-```bash
-cd ens-steward-calculator
-npm install
-```
+- Server-side API routes to handle CORS issues
+- 15-minute price data caching
+- Fallback data for API reliability
+- Mobile-responsive design
+- Real-time calculation updates
 
-2. **Set up environment variables:**
-   Create a `.env.local` file in the project root:
+![Mobile View](screenshots/mobile-responsive.png)
+_Responsive design works on all devices_
 
-```bash
-# CoinGecko API Configuration (get from https://www.coingecko.com/en/api/pricing)
-NEXT_PUBLIC_COINGECKO_API_KEY=your_api_key_here
+## 📊 App Components
 
-# Alternative server-side API key (more secure, recommended for production)
-COINGECKO_API_KEY=your_api_key_here
+### 1. Role Selector
 
-# App Configuration
-NEXT_PUBLIC_APP_VERSION=1.0.0
-```
+Choose between Steward and Lead Steward roles to see different compensation levels.
 
-3. **Get your CoinGecko API key:**
+### 2. Price Display
 
-   - Visit [CoinGecko API](https://coingecko.com/en/api/pricing)
-   - Sign up for a free account
-   - Get your API key from the dashboard
-   - Add it to your `.env.local` file
+Shows current $ENS price with projected 6-month average for token calculations.
 
-4. **Start the development server:**
+### 3. Token Calculation
 
-```bash
-npm run dev
-```
+Real-time breakdown of:
 
-5. **Open the application:**
-   - Visit [http://localhost:3000](http://localhost:3000)
-   - The app should load and start fetching real $ENS price data
-   - Try switching between Steward and Lead Steward roles
+- Total token allocation
+- Tokens vested at distribution (25%)
+- Monthly vesting amounts
+- Current USD value of allocation
 
-### 🔧 API Architecture
+### 4. Vesting Timeline
 
-This application uses **Next.js API Routes** to solve CORS issues:
+Visual representation of the 2-year vesting schedule with key dates and milestones.
 
-```
-Browser → /api/ens-price → CoinGecko API → /api/ens-price → Browser
-```
-
-**Local Development Notes:**
-
-- Direct browser calls to CoinGecko API are blocked by CORS
-- The API routes run server-side and bypass CORS restrictions
-- Fallback data is provided if CoinGecko API is unreachable
-
-### Testing the API Integration
-
-The app should automatically:
-
-- ✅ Fetch current $ENS price from CoinGecko via API routes
-- ✅ Calculate projected 6-month average
-- ✅ Update token calculations in real-time
-- ✅ Handle loading states and errors gracefully
-- ✅ Show fallback data if API is unreachable
-
-If you see price data loading, congratulations! The integration is working.
-
-## 📁 Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Main calculator page
-│   └── globals.css        # Global styles
-├── components/             # React components
-│   ├── Calculator/         # Core calculator components
-│   │   ├── RoleSelector.tsx
-│   │   ├── PriceDisplay.tsx
-│   │   └── TokenCalculation.tsx
-│   └── UI/                # Reusable UI components (future)
-├── hooks/                 # Custom React hooks
-│   └── usePriceData.ts    # Price data management
-├── lib/                   # Utility functions & API calls
-│   ├── api.ts            # CoinGecko integration
-│   ├── calculations.ts    # Business logic
-│   ├── constants.ts       # App constants
-│   └── utils.ts          # Utility functions (future)
-└── types/                 # TypeScript type definitions
-    └── index.ts          # All interfaces and types
-```
-
-## 🔧 Development
-
-### Available Scripts
-
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run type-check   # Run TypeScript checking (to be added)
-```
-
-### Environment Variables
-
-```bash
-# .env.local
-NEXT_PUBLIC_COINGECKO_API_KEY=your_api_key_here
-NEXT_PUBLIC_APP_VERSION=1.0.0
-```
-
-**Important:** The `NEXT_PUBLIC_` prefix makes these variables available in the browser. The CoinGecko API key is safe to expose as it's read-only for price data.
-
-## 📊 Features Status
-
-### ✅ Phase 1 (MVP) - COMPLETED
-
-- [x] Role selector (Steward vs Lead Steward)
-- [x] Real-time $ENS price display
-- [x] Token allocation calculator
-- [x] Basic responsive design
-- [x] CoinGecko API integration
-- [x] Vesting schedule calculations
-- [x] Error handling and loading states
-
-### 🚧 Phase 2 (Enhanced) - NEXT
-
-- [ ] Interactive price charts
-- [ ] Vesting timeline visualization
-- [ ] Enhanced UI/UX
-- [ ] Mobile optimization
-
-### 📋 Phase 3 (Production) - FUTURE
-
-- [ ] Error handling & fallbacks
-- [ ] Performance optimization
-- [ ] SEO optimization
-- [ ] Analytics integration
-
-## 🎨 Design System
-
-### Color Palette
-
-- **ENS Blue**: `#5298FF`
-- **Dark**: `#2B2D42`
-- **Light**: `#F8F9FA`
-- **Success**: `#22C55E`
-- **Error**: `#EF4444`
-
-### Typography
-
-- **Headings**: Inter, semi-bold
-- **Body**: Inter, regular
-- **Monospace**: JetBrains Mono (prices/numbers)
-
-## 🔗 API Integration
-
-### CoinGecko API
-
-- **Endpoint**: `/coins/ethereum-name-service/market_chart`
-- **Rate Limits**: 10-50 calls/minute (free tier)
-- **Caching**: 15-minute client-side TTL
+![Component Breakdown](screenshots/component-overview.png)
+_All calculator components working together_
 
 ## 🚨 Important Notes
 
-### Future Date Handling
+**Future Date Handling**: Since the calculation period (Jan 1 - July 1, 2025) is in the future, the app uses current $ENS price data as projections and clearly labels all estimates.
 
-Since the calculation period (Jan 1 - July 1, 2025) is in the future, the app currently:
+**Educational Purpose**: This is a transparency tool for ENS DAO stewards. Official compensation decisions are governed by ENS DAO governance processes, not this calculator.
 
-- Uses current $ENS price data as projections
-- Clearly labels estimates as "projected"
-- Will update methodology as actual dates approach
+**Price Volatility**: Token allocations will fluctuate with $ENS price changes until the 6-month averaging period begins.
 
-### Troubleshooting
+## 🔗 References
 
-**API Errors:**
-
-- Check your `.env.local` file has the correct API key
-- Verify internet connection
-- CoinGecko free tier has rate limits - wait a few minutes and try again
-
-**Build Errors:**
-
-- Run `npm run lint` to check for linting issues
-- Ensure all imports are correct
-- Check TypeScript errors with `tsc --noEmit`
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- ENS DAO community for governance and compensation structure
-- CoinGecko for reliable price data API
-- Next.js team for excellent framework and documentation
-
-## 📞 Support
-
-For questions about ENS DAO steward compensation, refer to:
-
-- [EP 5.18] ENS DAO Steward Compensation Structure - Term 6
-- ENS DAO governance forums
-- This application's GitHub Issues
+- **Official Proposal**: [EP 5.18 - ENS DAO Steward Compensation Structure - Term 6](https://discuss.ens.domains/t/ens-dao-steward-compensation-structure-term-6/19739) - ENS DAO Governance Forum
+- **Data Source**: CoinGecko API for $ENS price data
+- **DAO Forums**: ENS DAO governance discussions
 
 ---
 
-**Note**: This is an educational tool for transparency. Official compensation decisions are governed by ENS DAO governance processes.
+**Note**: This calculator implements the compensation structure from [EP 5.18](https://discuss.ens.domains/t/ens-dao-steward-compensation-structure-term-6/19739), which passed DAO vote. Official compensation decisions are governed by ENS DAO governance processes.

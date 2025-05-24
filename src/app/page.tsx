@@ -119,7 +119,12 @@ export default function Home() {
                 </p>
                 <p className="text-xs text-gray-500 mt-4">
                   Based on{" "}
-                  <a href="#" className="text-blue-600 hover:underline">
+                  <a
+                    href="https://discuss.ens.domains/t/ens-dao-steward-compensation-structure-term-6/19739"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
                     [EP 5.18] ENS DAO Steward Compensation Structure - Term 6
                   </a>
                 </p>
