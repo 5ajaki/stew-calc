@@ -33,6 +33,19 @@ export async function GET(request: NextRequest) {
     } else if (type === "history") {
       const days = searchParams.get("days") || "180";
       apiUrl = `${COINGECKO_BASE_URL}/coins/${ENS_COIN_ID}/market_chart?vs_currency=usd&days=${days}&interval=daily`;
+    } else if (type === "range") {
+      // New range-based endpoint
+      const from = searchParams.get("from");
+      const to = searchParams.get("to");
+
+      if (!from || !to) {
+        return NextResponse.json(
+          { error: "Missing 'from' or 'to' parameters for range query" },
+          { status: 400 }
+        );
+      }
+
+      apiUrl = `${COINGECKO_BASE_URL}/coins/${ENS_COIN_ID}/market_chart/range?vs_currency=usd&from=${from}&to=${to}`;
     } else {
       return NextResponse.json(
         { error: "Invalid type parameter" },
@@ -78,7 +91,7 @@ export async function GET(request: NextRequest) {
       if (!price || !isValidPrice(price)) {
         throw new Error("Invalid price data received");
       }
-    } else if (type === "history") {
+    } else if (type === "history" || type === "range") {
       if (!data.prices || !Array.isArray(data.prices)) {
         throw new Error("Invalid history data received");
       }
