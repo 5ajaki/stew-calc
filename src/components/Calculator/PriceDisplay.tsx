@@ -166,8 +166,37 @@ export function PriceDisplay({
         </div>
 
         <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-          <h3 className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
+          <h3 className="text-sm font-medium text-green-800 dark:text-green-200 mb-1 flex items-center">
             6-Month Average
+            <span className="text-gray-500 dark:text-gray-400 ml-1">
+              (estimated)
+            </span>
+            <div className="relative ml-1 group">
+              <svg
+                className="w-4 h-4 text-gray-400 dark:text-gray-500 cursor-help"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none w-64 z-10">
+                <div className="text-center">
+                  <strong>Calculation Method:</strong>
+                  <br />
+                  • Jan 1 - Today: Real historical ENS prices
+                  <br />
+                  • Today - July 1: Current price projected forward
+                  <br />• Final average calculated over all 181 days
+                </div>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
+              </div>
+            </div>
           </h3>
           <p className="text-2xl font-bold text-green-900 dark:text-green-100">
             {formatCurrency(priceHistory.averagePrice)}
