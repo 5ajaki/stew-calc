@@ -235,7 +235,7 @@ export async function calculateProjectedSixMonthAverage(): Promise<PriceHistory>
         console.log(
           `[API] Fetched ${historicalPrices.length} days of historical data`
         );
-      } catch (_error) {
+      } catch {
         console.warn(
           "[API] Could not fetch historical data, using current price for all days"
         );
