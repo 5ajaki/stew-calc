@@ -1,23 +1,26 @@
 "use client";
 
-import { PriceDisplayProps } from "@/types";
+import { useState } from "react";
+import { PriceDisplayProps, PriceData } from "@/types";
 import { formatCurrency } from "@/lib/calculations";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 export function PriceDisplay({
   priceHistory,
   loading,
   error,
 }: PriceDisplayProps) {
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
           <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-          <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
         </div>
       </div>
     );
@@ -25,136 +28,308 @@ export function PriceDisplay({
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6 border border-red-200">
-        <div className="flex items-center mb-4">
-          <div className="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Price Data Error
-          </h2>
-        </div>
+      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          $ENS Price Data
+        </h2>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800 font-medium mb-2">
-            Unable to fetch price data
-          </p>
-          <p className="text-red-600 text-sm">{error.message}</p>
-          <p className="text-red-500 text-xs mt-2">
-            Error occurred at{" "}
-            {format(new Date(error.timestamp), "MMM dd, yyyy h:mm a")}
-          </p>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-red-400 rounded-full mr-2"></div>
+            <div className="text-sm text-red-800">
+              Error loading price data: {error.message}
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   if (!priceHistory) {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-        <div className="text-center py-8">
-          <div className="text-gray-400 mb-2">No price data available</div>
-          <div className="text-sm text-gray-500">
-            Please try refreshing the page
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
-  const lastUpdated = format(
-    new Date(priceHistory.lastUpdated),
-    "MMM dd, yyyy h:mm a"
-  );
+  const { calculationPeriod } = priceHistory;
+
+  // Functions for the detailed table
+  const toggleSort = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return format(parseISO(dateStr), "MMM dd, yyyy");
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const calculateRunningAverage = (
+    prices: PriceData[],
+    index: number
+  ): number => {
+    const relevantPrices = prices.slice(0, index + 1);
+    const sum = relevantPrices.reduce((acc, p) => acc + p.price, 0);
+    return sum / relevantPrices.length;
+  };
+
+  const sortedPrices = calculationPeriod
+    ? [...priceHistory.prices].sort((a, b) => {
+        const timeA = new Date(a.date).getTime();
+        const timeB = new Date(b.date).getTime();
+        return sortOrder === "asc" ? timeA - timeB : timeB - timeA;
+      })
+    : [];
+
+  // CSV download function
+  const downloadCSV = () => {
+    if (!calculationPeriod) return;
+
+    const headers = ["Date", "Price (USD)", "Running Average", "Type"];
+    const csvContent = [
+      headers.join(","),
+      ...sortedPrices.map((priceData: PriceData, index: number) => {
+        const isProjected = priceData.isProjected || false;
+        const runningAvg = calculateRunningAverage(sortedPrices, index);
+
+        return [
+          priceData.date,
+          priceData.price.toFixed(4),
+          runningAvg.toFixed(4),
+          isProjected ? "Projected" : "Historical",
+        ].join(",");
+      }),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `ens-term6-price-data-${new Date().toISOString().split("T")[0]}.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          $ENS Price Data
-        </h2>
-        <p className="text-sm text-gray-600">
-          Real-time pricing for token allocation calculations
-        </p>
-      </div>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        $ENS Price Data
+      </h2>
 
-      <div className="space-y-4">
-        {/* Current Price */}
-        <div className="bg-blue-50 rounded-lg p-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="font-medium text-gray-700 mb-1">Current Price</h3>
-              <div className="font-mono text-2xl font-bold text-blue-600">
-                {formatCurrency(priceHistory.currentPrice)}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <div className="text-xs text-gray-500 mt-1">Live</div>
-            </div>
-          </div>
+      {/* Current Price Display */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="p-4 bg-blue-50 rounded-lg">
+          <h3 className="text-sm font-medium text-blue-800 mb-1">
+            Current Price
+          </h3>
+          <p className="text-2xl font-bold text-blue-900">
+            {formatCurrency(priceHistory.currentPrice)}
+          </p>
+          <p className="text-sm text-blue-600">Real-time from CoinGecko</p>
         </div>
 
-        {/* Projected 6-Month Average */}
-        <div className="bg-yellow-50 rounded-lg p-4">
-          <div className="flex justify-between items-center">
+        <div className="p-4 bg-green-50 rounded-lg">
+          <h3 className="text-sm font-medium text-green-800 mb-1">
+            6-Month Average
+          </h3>
+          <p className="text-2xl font-bold text-green-900">
+            {formatCurrency(priceHistory.averagePrice)}
+          </p>
+          <p className="text-sm text-green-600">Jan 1 - July 1, 2025</p>
+        </div>
+      </div>
+
+      {/* Term 6 Calculation Details Section */}
+      {calculationPeriod && (
+        <div className="border-t pt-4">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-medium text-gray-700 mb-1">
-                Projected 6-Month Average
-                <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                  Estimate
-                </span>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Term 6 Price Calculation Details
               </h3>
-              <div className="font-mono text-2xl font-bold text-yellow-600">
+              <p className="text-sm text-gray-600">
+                January 1 - July 1, 2025 ({calculationPeriod.totalDays} days
+                total)
+              </p>
+            </div>
+            <div className="flex space-x-2">
+              {isDetailOpen && (
+                <button
+                  onClick={downloadCSV}
+                  className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center"
+                  title="Download price data as CSV"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  CSV
+                </button>
+              )}
+              <button
+                onClick={() => setIsDetailOpen(!isDetailOpen)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                {isDetailOpen ? "Hide Details" : "Show Details"}
+              </button>
+            </div>
+          </div>
+
+          {/* Summary stats */}
+          <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
+            <div className="text-center p-3 bg-green-50 rounded-lg">
+              <div className="font-semibold text-green-800">
+                Historical Days
+              </div>
+              <div className="text-green-600">
+                {calculationPeriod.historicalDays}
+              </div>
+            </div>
+            <div className="text-center p-3 bg-blue-50 rounded-lg">
+              <div className="font-semibold text-blue-800">Projected Days</div>
+              <div className="text-blue-600">
+                {calculationPeriod.projectedDays}
+              </div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="font-semibold text-gray-800">Average Price</div>
+              <div className="text-gray-600">
                 {formatCurrency(priceHistory.averagePrice)}
               </div>
             </div>
           </div>
-          <div className="mt-2 text-xs text-gray-600">
-            Based on current market data. Actual average will be calculated from
-            Jan 1 - July 1, 2025.
-          </div>
-        </div>
 
-        {/* Data Info */}
-        <div className="border-t pt-4">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-500">Data points:</span>
-            <span className="font-medium">
-              {priceHistory.prices.length} days
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-sm mt-1">
-            <span className="text-gray-500">Last updated:</span>
-            <span className="font-medium">{lastUpdated}</span>
-          </div>
-        </div>
-
-        {/* Important Notice */}
-        <div className="bg-gray-50 rounded-lg p-3">
-          <div className="flex items-start">
-            <div className="w-4 h-4 bg-blue-500 rounded-full mr-2 mt-0.5 flex-shrink-0"></div>
-            <div className="text-xs text-gray-600">
-              <strong>Note:</strong> Token calculations use the 6-month average
-              price from January 1 to July 1, 2025. Current projections are
-              based on recent market data and will be updated with actual prices
-              as dates approach.
-            </div>
-          </div>
-        </div>
-
-        {/* API Status Notice */}
-        {priceHistory &&
-          priceHistory.prices.length === 180 &&
-          Math.abs(priceHistory.currentPrice - 10) < 0.01 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <div className="flex items-start">
-                <div className="w-4 h-4 bg-yellow-400 rounded-full mr-2 mt-0.5 flex-shrink-0"></div>
-                <div className="text-xs text-yellow-800">
-                  <strong>Using Demo Data:</strong> Unable to connect to live
-                  price API. Calculations are using fallback price data for
-                  demonstration purposes.
+          {/* Expandable detailed table */}
+          {isDetailOpen && (
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center space-x-4 text-sm">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                    <span>
+                      Historical Data ({calculationPeriod.historicalDays} days)
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                    <span>
+                      Projected Data ({calculationPeriod.projectedDays} days)
+                    </span>
+                  </div>
                 </div>
+              </div>
+
+              <div className="overflow-x-auto max-h-96 border border-gray-200 rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                        onClick={toggleSort}
+                      >
+                        Date {sortOrder === "asc" ? "↑" : "↓"}
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Price (USD)
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Running Avg
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {sortedPrices.map((priceData: PriceData, index: number) => {
+                      const isProjected = priceData.isProjected || false;
+                      const runningAvg = calculateRunningAverage(
+                        sortedPrices,
+                        index
+                      );
+
+                      return (
+                        <tr
+                          key={priceData.date}
+                          className={`hover:bg-gray-50 ${
+                            isProjected
+                              ? "bg-blue-50 border-l-4 border-blue-500"
+                              : "bg-green-50 border-l-4 border-green-500"
+                          }`}
+                        >
+                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                            {formatDate(priceData.date)}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm font-mono">
+                            <span
+                              className={
+                                isProjected ? "text-blue-800" : "text-green-800"
+                              }
+                            >
+                              {formatCurrency(priceData.price)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-600">
+                            {formatCurrency(runningAvg)}
+                          </td>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                isProjected
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {isProjected ? "Projected" : "Historical"}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-4 text-xs text-gray-500">
+                <p>
+                  <strong>Historical Data:</strong> Actual ENS prices from
+                  CoinGecko API
+                </p>
+                <p>
+                  <strong>Projected Data:</strong> Assumes price remains at
+                  current level ({formatCurrency(priceHistory.currentPrice)})
+                  through July 1, 2025
+                </p>
+                <p className="mt-2">
+                  As days progress, more data becomes historical and fewer days
+                  remain projected.
+                </p>
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Data source info */}
+      <div className="mt-4 pt-4 border-t text-xs text-gray-500">
+        <p>
+          Data source: CoinGecko API • Last updated:{" "}
+          {new Date(priceHistory.lastUpdated).toLocaleString()}
+        </p>
       </div>
     </div>
   );

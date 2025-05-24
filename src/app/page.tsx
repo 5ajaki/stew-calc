@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { RoleSelector } from "@/components/Calculator/RoleSelector";
 import { PriceDisplay } from "@/components/Calculator/PriceDisplay";
-import { PriceDetailTable } from "@/components/Calculator/PriceDetailTable";
 import { TokenCalculation } from "@/components/Calculator/TokenCalculation";
 import { usePriceData } from "@/hooks/usePriceData";
 import { STEWARD_ROLES, DEFAULTS } from "@/lib/constants";
@@ -59,28 +57,21 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column */}
           <div className="space-y-8">
-            {/* Role Selector */}
-            <RoleSelector
-              selectedRole={selectedRole}
-              onRoleChange={setSelectedRole}
-            />
-
-            {/* Price Display */}
+            {/* Price Display with integrated details */}
             <PriceDisplay
               priceHistory={priceHistory}
               loading={loading}
               error={error}
             />
-
-            {/* Price Detail Table */}
-            {priceHistory && <PriceDetailTable priceHistory={priceHistory} />}
           </div>
 
           {/* Right Column */}
           <div className="space-y-8">
-            {/* Token Calculation */}
+            {/* Token Calculation with integrated role selector */}
             {tokenData ? (
               <TokenCalculation
+                selectedRole={selectedRole}
+                onRoleChange={setSelectedRole}
                 role={tokenData.role}
                 averagePrice={tokenData.averagePrice}
                 vestingSchedule={tokenData.vestingSchedule}
