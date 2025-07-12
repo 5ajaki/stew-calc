@@ -22,14 +22,14 @@
 | **Sov**        | 2,136.64   | Same as comp        | `0xf6CC50d8Dff53C10686D3Beb7642AEDd0600F7f7` | Using comp address                  |
 | **Donnie**     | 2,136.64   | steward.daemon.eth  | `0x719e67af46316B931FB93961A02E956B6d2dDdf0` | Same as comp, first time Hedgey     |
 | **Cam**        | 2,136.64   | -                   | -                                            | Need address, first time Hedgey     |
-| **Netto**      | 2,136.64   | -                   | -                                            | Need address                        |
+| **Netto**      | 2,136.64   | steward.netto.eth   | `0x75d91395CD36f24f990bbdE69993cB20B96EcFa6` | Using comp address                  |
 
 ## Summary
 
 - **Total Stewards**: 9 (3 Lead, 6 Regular)
 - **Total ENS to Distribute**: 21,633.51 ENS
-- **Confirmed Addresses**: 7 of 9
-- **Pending**: 2 (Cam, Netto)
+- **Confirmed Addresses**: 8 of 9
+- **Pending**: 1 (Cam)
 
 ## Notes
 
@@ -40,6 +40,5 @@
 ## Action Items
 
 - [ ] Get Hedgey address from Cam (daostrat.eth)
-- [ ] Get Hedgey address from Netto (steward.netto.eth)
 
 ---
