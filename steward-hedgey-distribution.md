@@ -31,6 +31,13 @@
 - **Confirmed Addresses**: 8 of 9
 - **Pending**: 1 (Cam)
 
+## Hedgey Distribution File
+
+- **CSV File**: [ens-steward-hedgey-distribution.csv](./ens-steward-hedgey-distribution.csv)
+- **Format**: Hedgey-compatible CSV (Recipient address, Amount of tokens, Vesting start date)
+- **Vesting Start**: January 1, 2025
+- **Contains**: 8 confirmed stewards (19,496.87 ENS total)
+
 ## Notes
 
 1. First-time Hedgey recipients: Donnie, Sov, Cam
