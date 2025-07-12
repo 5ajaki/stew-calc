@@ -17,12 +17,12 @@
 | Name           | Role         | ENS Tokens | Hedgey Address      | Resolved Address                             | Status          | Notes                               |
 | -------------- | ------------ | ---------- | ------------------- | -------------------------------------------- | --------------- | ----------------------------------- |
 | **Spence**     | Lead Steward | 2,937.89   | 5pence.eth          | `0xe52C39327FF7576bAEc3DBFeF0787bd62dB6d726` | ✅ Confirmed    | Different from comp address         |
-| **Alex Slobo** | Lead Steward | 2,937.89   | steward.slobo.eth   | `0xB9a0fB254Aea7Bcec79c7bd8052dcd902a5388Ff` | ✅ Confirmed    | Same as previous                    |
-| **Simona**     | Lead Steward | 2,937.89   | steward.simona.eth  | `0x54BeCc7560a7Be76d72ED76a1f5fee6C5a2A7Ab6` | ✅ Confirmed    | ENS resolved                        |
+| **Alex Slobo** | Lead Steward | 2,937.89   | steward.slobo.eth   | `0xB9a0fB254Aea7Bcec79c7bd8052dcd902a5388Ff` | ✅ Confirmed    | Same as comp address                |
+| **Simona**     | Lead Steward | 2,937.89   | steward.simona.eth  | `0x54BeCc7560a7Be76d72ED76a1f5fee6C5a2A7Ab6` | ✅ Confirmed    | Same as comp address                |
 | **Limes**      | Steward      | 2,136.64   | delegate.limes.eth  | `0x62Ee7bcE69B5863058cF1a4976F75452E9b5d360` | ✅ Confirmed    | Different from comp (pay.limes.eth) |
-| **Coltron**    | Steward      | 2,136.64   | steward.coltron.eth | `0xd2cc2e47c2Aecd01C87B83290c0Ee76BA67a7211` | ✅ Confirmed    | Same as previous                    |
+| **Coltron**    | Steward      | 2,136.64   | steward.coltron.eth | `0xd2cc2e47c2Aecd01C87B83290c0Ee76BA67a7211` | ✅ Confirmed    | Same as comp address                |
 | **Sov**        | Steward      | 2,136.64   | Same as comp        | `0xf6CC50d8Dff53C10686D3Beb7642AEDd0600F7f7` | ✅ Confirmed    | Using comp address                  |
-| **Donnie**     | Steward      | 2,136.64   | steward.daemon.eth  | `0x719e67af46316B931FB93961A02E956B6d2dDdf0` | ✅ Confirmed    | First time Hedgey recipient         |
+| **Donnie**     | Steward      | 2,136.64   | steward.daemon.eth  | `0x719e67af46316B931FB93961A02E956B6d2dDdf0` | ✅ Confirmed    | Same as comp, first time Hedgey     |
 | **Cam**        | Steward      | 2,136.64   | -                   | -                                            | 🔴 Need Address | First time Hedgey recipient         |
 | **Netto**      | Steward      | 2,136.64   | -                   | -                                            | 🔴 Need Address | Needs to provide address            |
 
@@ -46,4 +46,4 @@
 
 ---
 
-_Last updated: July 12, 2025_
+_Last updated: December 21, 2024_
